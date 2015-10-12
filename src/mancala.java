@@ -2,6 +2,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import javax.print.attribute.standard.MediaSize.Other;
+
 
 public class mancala {
 
@@ -41,48 +43,59 @@ public class mancala {
 	static  int minimaxDecision(List<Integer> game, String myPlayer, Integer cutOffDepth){
 
 		int currMinValue = 100000;
+		int currMaxValue = -100000;
 		int returnedValue;
 
-		returnedValue = minValue(game, myPlayer);
+		int gameArraySize = game.size();
+		int firstMancalaIndex = (gameArraySize / 2) - 1;
+		int secondMancalaIndex = gameArraySize - 1;
+		
+		System.out.println(firstMancalaIndex);
+		System.out.println(secondMancalaIndex);
+		
+		
+		/*//code to traverse for second player
+		List<Integer> secondTraversalOrder = new ArrayList<Integer>();
+		for (int i = secondMancalaIndex -1; i > firstMancalaIndex; i--){
+			System.out.println("inside the for loop");
+			secondTraversalOrder.add(game.get(i));
+		}*/
+		
+		if (myPlayer == "1"){
+			returnedValue = Math.max(currMaxValue, minValue(game, myPlayer, firstMancalaIndex, secondMancalaIndex));
+		}
+		/*else if (myPlayer == "2"){
+			returnedValue = Math.min(currMinValue, maxValue(game, myPlayer, firstMancalaIndex, secondMancalaIndex);)
+		}*/
+	
 
 		return 0;
 	}
 
 
-	static int minValue(List game, String player){
+/*	static int minValue(List game, String player)minValue(game, myPlayer, firstMancalaIndex, secondMancalaIndex));{
+		
+		
+		
+		
+		int noOfCoins = (int)game.get(index);
+
+
 
 		play(game, player, 6);
 
 
 		return 0;
 	}
+*/
+	static int play(List game, String player, int index, int noOfCoins, int myMancalaIndex, int oppositionMancalaIndex){
 
-	static int play(List game, String player, int index){
-
-		int noOfCoins = (int)game.get(index);
-		
-		int oppositionMancalaIndex = 0;		//initializing the variable
-		int myMancalaIndex = 0;
-		int gameArraySize = game.size();
-		
-		if (player == "1"){		//player 1 has the lower end ofthe mancala
-			oppositionMancalaIndex = (gameArraySize / 2) - 1;
-			myMancalaIndex = gameArraySize - 1;
-			}
-		else if (player == "2"){
-			oppositionMancalaIndex = gameArraySize - 1;
-			myMancalaIndex = (gameArraySize / 2) - 1;
-			}
-		else{
-			System.out.println("There is an issue with assignment of opposition's mancala.");
-		}
-
-		System.out.println(noOfCoins);
+		//System.out.println(noOfCoins);
 
 		//device a strategy to just traverse thru both the player's
 		//boxes and mancala until move is over
 
-		System.out.println(game);
+		//System.out.println(game);
 		//System.out.println(noOfCoins);
 
 		for (int iter = 0; iter < noOfCoins; iter++){
@@ -91,7 +104,10 @@ public class mancala {
 			}
 			
 			if (index == oppositionMancalaIndex){
-				
+				//add a pebble to the next available box instead of opposition's mancala
+				index = index + 1;
+				int newValue = (int)game.get(index) + 1;
+				game.set(index, newValue);
 			}
 			else{
 				int newValue = (int)game.get(index) + 1;
@@ -105,7 +121,7 @@ public class mancala {
 		int eval = 0;
 		
 		if (player == "1"){		//player 1 has the lower end ofthe mancala
-			
+			eval = (int)game.get(myMancalaIndex) - (int)game.get(oppositionMancalaIndex);
 			}
 		else if (player == "2"){
 			eval = (int)game.get(oppositionMancalaIndex) - (int)game.get(myMancalaIndex);
@@ -113,6 +129,8 @@ public class mancala {
 		else{
 			System.out.println("There is an issue with assignment of opposition's mancala.");
 		}
+		
+		System.out.println("the eval of this board is" +eval);
 		
 		return eval;
 
