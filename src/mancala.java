@@ -108,13 +108,15 @@ public class mancala {
 		return 0;
 	}
 
-	static int play(List game, int index, int oppositionMancalaIndex){
+	static List play(List game, int index, int oppositionMancalaIndex){
 
 		//device a strategy to just traverse thru both the player's
 		//boxes and mancala until move is over
 		
 		int noOfCoins = (int)game.get(index);
+		game.set(index, 0);
 		
+		System.out.println("printing game now: " + game);
 		System.out.println(noOfCoins);
 
 		for (int iter = 0; iter < noOfCoins; iter++){
@@ -129,13 +131,19 @@ public class mancala {
 				game.set(index, newValue);
 			}
 			else{
+				index = index + 1;
 				int newValue = (int)game.get(index) + 1;
 				game.set(index, newValue);
 			}
 			//System.out.println(game.get(index));
-			index = index + 1;
 
 		}
+		
+		return game;
+
+	}
+	
+	static int eval(List game){
 		
 		int eval = 0;
 		if (myPlayer == "1"){
@@ -148,10 +156,7 @@ public class mancala {
 			System.out.println("There is an error in an error at eval function");
 		}
 		
-		System.out.println("prinitjng eval " + eval);
-		
+		System.out.println("prinitjng eval " + eval + "board state: " + game);
 		return eval;
-
-
 	}
 }
