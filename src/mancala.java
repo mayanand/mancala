@@ -9,6 +9,7 @@ public class mancala {
 	static int firstMancalaIndex = 0;
 	static int secondMancalaIndex = 0;
 	static String myPlayer = "1";		//harcoded it for now
+	static boolean bonusChance = false;
 	static List <String> positionGame = new ArrayList<String>();
 
 	public static void main(String[] args) {
@@ -95,30 +96,36 @@ public class mancala {
 
 	static int minValue(List game, int index){
 		//terminal test condition needs to be added here
-		
+		/*
 		System.out.println("game " + game);
 		System.out.println("index " + index);
 		System.out.println("first index " + firstMancalaIndex);
 		System.out.println("second index " + secondMancalaIndex);
-		
+		*/
 		int currMaxValue = -100000;
+		int newEvalValue;
+		List newGameState;
 				
-		System.out.println(play(game, 2, 7));
+		//System.out.println(play(game, 2, 3, 7));
+		//these values need to be dynamic
+		newGameState =  play(game, 1, 3, 7);
+		newEvalValue = eval(newGameState);
+		if (bonusChance){
+			//play this again for all the possible configuration
+		}
 
 		return 0;
 	}
 
-	static List play(List game, int index, int oppositionMancalaIndex){
+	static List play(List game, int index, int myMancalaIndex, int oppositionMancalaIndex){
 
 		//device a strategy to just traverse thru both the player's
 		//boxes and mancala until move is over
 		
 		int noOfCoins = (int)game.get(index);
-		game.set(index, 0);
-		
-		System.out.println("printing game now: " + game);
-		System.out.println(noOfCoins);
-
+		game.set(index, 0);	
+		index = index + 1;
+	
 		for (int iter = 0; iter < noOfCoins; iter++){
 			if (index == game.size()){
 				index = 0;
@@ -131,12 +138,18 @@ public class mancala {
 				game.set(index, newValue);
 			}
 			else{
-				index = index + 1;
 				int newValue = (int)game.get(index) + 1;
 				game.set(index, newValue);
+				
+				//setting the flag for bonus chance to be played
+				if (iter == noOfCoins - 1 && index == myMancalaIndex){
+					bonusChance = true;
+				}
+				
+				index = index + 1;
 			}
-			//System.out.println(game.get(index));
-
+			
+			System.out.println("game state now: "+ game + " index value: " + index);
 		}
 		
 		return game;
@@ -156,7 +169,7 @@ public class mancala {
 			System.out.println("There is an error in an error at eval function");
 		}
 		
-		System.out.println("prinitjng eval " + eval + "board state: " + game);
+		//System.out.println("prinitjng eval " + eval + "board state: " + game);
 		return eval;
 	}
 }
