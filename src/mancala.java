@@ -9,6 +9,7 @@ public class mancala {
 	static int firstMancalaIndex = 0;
 	static int secondMancalaIndex = 0;
 	static String myPlayer = "1";		//harcoded it for now
+	static int cutOffDepth = 2;
 	static boolean bonusChance = false;
 	static List <String> positionGame = new ArrayList<String>();
 
@@ -34,20 +35,19 @@ public class mancala {
 		positionGame.add("a1");
 		positionGame.add("aMancala");
 		
-
-		String myPlayer = "2";
-		Integer cutOffDepth = 2;
-		//		Integer player1Mancala = 0;
-		//		Integer player2Mancala = 0;
-
-		minimaxDecision(game, myPlayer, cutOffDepth);
+		minimaxDecision(game, myPlayer);
 
 	}
 
-	static  int minimaxDecision(List<Integer> game, String myPlayer, Integer cutOffDepth){
+	static  int minimaxDecision(List<Integer> game, String myPlayer){
 
 		int currMinValue = 100000;
+		int currMaxValue = -100000;
+		int currGameLevel = 1;
+		int currIndex = 0;			//the index of the bucket being played right now, initializing to zero
 		int returnedValue;
+		
+		currIndex = 1;	//hardcoding the value of index for now
 		
 		List< Integer> results = new ArrayList<Integer>();
 
@@ -56,13 +56,8 @@ public class mancala {
 		secondMancalaIndex = gameArraySize - 1;
 		int bestValue;
 		
-		
-		minValue(game, 2);
-		
-		
-//		System.out.println(firstMancalaIndex);
-//		System.out.println(secondMancalaIndex);
-//		
+		//setting level as 1 in the 1st step
+		minValue(game, currIndex, currGameLevel, currMaxValue, myPlayer);
 		
 		/*//code to traverse for second player
 		List<Integer> secondTraversalOrder = new ArrayList<Integer>();
@@ -94,26 +89,51 @@ public class mancala {
 	}
 
 
-	static int minValue(List game, int index){
+	static int minValue(List game, int index, int level, int newEvalValue,String currPlayer){
 		//terminal test condition needs to be added here
-		/*
-		System.out.println("game " + game);
-		System.out.println("index " + index);
-		System.out.println("first index " + firstMancalaIndex);
-		System.out.println("second index " + secondMancalaIndex);
-		*/
+		
+		if (cutOffDepth == level){
+			return newEvalValue;
+		}
+		
+		
 		int currMaxValue = -100000;
-		int newEvalValue;
 		List newGameState;
 				
 		//System.out.println(play(game, 2, 3, 7));
 		//these values need to be dynamic
-		newGameState =  play(game, 1, 3, 7);
+		newGameState =  play(game, index, 3, 7);
 		newEvalValue = eval(newGameState);
+		
+		System.out.println("printing new game state and eval value below");
+		System.out.println(newGameState);
+		System.out.println(newEvalValue);
+		
 		if (bonusChance){
+			System.out.println("inside bonus chance");
 			//play this again for all the possible configuration
+			if (currPlayer == "1"){
+				for (int i = 0; i<firstMancalaIndex; i++){
+					if ((int)newGameState.get(i) > 0){
+						minValue(newGameState, i, level, newEvalValue, currPlayer);
+					}
+				}
+			}
+			else if (currPlayer == "2"){
+				for (int i = secondMancalaIndex - 1; i > firstMancalaIndex; i--){
+					if ((int)newGameState.get(i) > 0){
+						minValue(newGameState, i, level, newEvalValue, currPlayer);
+					}
+				}
+			}
 		}
-
+		
+		
+		System.out.println("!!!bonus printing the game state and eval value below");
+		System.out.println(newGameState);
+		System.out.println(newEvalValue);
+		
+		
 		return 0;
 	}
 
@@ -134,6 +154,9 @@ public class mancala {
 			if (index == oppositionMancalaIndex){
 				//add a pebble to the next available box instead of opposition's mancala
 				index = index + 1;
+				if (index == game.size()){
+					index = 0;
+				}
 				int newValue = (int)game.get(index) + 1;
 				game.set(index, newValue);
 			}
