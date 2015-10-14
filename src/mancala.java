@@ -67,25 +67,15 @@ public class mancala {
 
 
 	static int minValue(List game, int level, int newEvalValue,String currPlayer){
-		//terminal test condition needs to be added here
 		
-		if (cutOffDepth == level){
+		//terminal condition test
+		if (cutOffDepth == level - 1){
 			return newEvalValue;
 		}
 		
-		
-		int currMaxValue = -100000;
+		int currMinValue = 100000;
 		List newGameState = null;
 		List <Integer> legalMoves = null;
-				
-		//System.out.println(play(game, 2, 3, 7));
-		//these values need to be dynamic
-		
-		System.out.println("$$$$$$$$$$$4calling play with values game, index");
-		System.out.println(game);
-		//System.out.println(index);
-		
-		//this mancala index should be dynamic based on the player playing here
 		
 		legalMoves = getAllLegalMoves(game, currPlayer);
 		for (Integer index: legalMoves){
@@ -103,10 +93,55 @@ public class mancala {
 			//play this again for all the possible configuration
 			minValue(newGameState, level, newEvalValue,currPlayer);	
 		}
-		return 0;
+		else{
+			String newPlayer = null;
+			if (currPlayer == "1"){ newPlayer = "2"; }
+			else {newPlayer = "2";}
+			
+			currMinValue = Math.min(currMinValue, maxValue(newGameState, level + 1, currMinValue, newPlayer));
+			
+		}
+		return currMinValue;
 	}
 
-
+static int maxValue(List game, int level, int newEvalValue, String currPlayer){
+		
+		//terminal condition test
+		if (cutOffDepth == level - 1){
+			return newEvalValue;
+		}
+		
+		int currMaxValue = -100000;
+		List newGameState = null;
+		List <Integer> legalMoves = null;
+		
+		legalMoves = getAllLegalMoves(game, currPlayer);
+		for (Integer index: legalMoves){
+			newGameState =  play(game, index, firstMancalaIndex, secondMancalaIndex);
+			newEvalValue = eval(newGameState);
+		}
+		
+		System.out.println("printing new game state and eval value below");
+		System.out.println(newGameState);
+		System.out.println(newEvalValue);
+		
+		
+		if (bonusChance){
+			System.out.println("inside bonus chance");
+			//play this again for all the possible configuration
+			minValue(newGameState, level, newEvalValue,currPlayer);	
+		}
+		
+		else{
+			String newPlayer = null;
+			if (currPlayer == "1"){ newPlayer = "2"; }
+			else {newPlayer = "2";}
+			
+			currMaxValue = Math.max(currMaxValue, minValue(newGameState, level + 1, currMaxValue, newPlayer));
+		}
+			
+		return currMaxValue;
+	}
 	static List getAllLegalMoves(List game, String player){
 
 		List<Integer> legalMoves = new ArrayList<Integer>();
@@ -133,6 +168,8 @@ public class mancala {
 
 		//device a strategy to just traverse thru both the player's
 		//boxes and mancala until move is over
+		
+		bonusChance = false;	//resetting bonus flag for next move
 		
 		int noOfCoins = (int)game.get(index);
 		game.set(index, 0);	
