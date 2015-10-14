@@ -44,10 +44,7 @@ public class mancala {
 		int currMinValue = 100000;
 		int currMaxValue = -100000;
 		int currGameLevel = 1;
-		int currIndex = 0;			//the index of the bucket being played right now, initializing to zero
 		int returnedValue;
-		
-		currIndex = 1;	//hardcoding the value of index for now
 		
 		List< Integer> results = new ArrayList<Integer>();
 
@@ -57,30 +54,10 @@ public class mancala {
 		int bestValue;
 		
 		//setting level as 1 in the 1st step
-		minValue(game, currIndex, currGameLevel, currMaxValue, myPlayer);
+		minValue(game, currGameLevel, currMaxValue, myPlayer);
 		
-		/*//code to traverse for second player
-		List<Integer> secondTraversalOrder = new ArrayList<Integer>();
-		for (int i = secondMancalaIndex -1; i > firstMancalaIndex; i--){
-			System.out.println("inside the for loop");
-			secondTraversalOrder.add(game.get(i));
-		}*/
+		
 		/*
-		if (myPlayer == "1"){
-			for (int i = 0; i < firstMancalaIndex; i++){
-				//returnedValue = Math.max(currMaxValue, );
-				results.add(minValue(game, i));
-			}
-		}
-		else if (myPlayer == "2"){
-			for (int i = secondMancalaIndex - 1; i > firstMancalaIndex; i--){
-				//returnedValue = Math.max(currMaxValue, );
-				System.out.println(minValue(game, i));
-				//results.add(minValue(game, i, firstMancalaIndex, secondMancalaIndex));
-			}
-		}
-		
-		
 		bestValue = Collections.max(results);
 		System.out.println(bestValue);
 	*/
@@ -89,7 +66,7 @@ public class mancala {
 	}
 
 
-	static int minValue(List game, int index, int level, int newEvalValue,String currPlayer){
+	static int minValue(List game, int level, int newEvalValue,String currPlayer){
 		//terminal test condition needs to be added here
 		
 		if (cutOffDepth == level){
@@ -98,45 +75,60 @@ public class mancala {
 		
 		
 		int currMaxValue = -100000;
-		List newGameState;
+		List newGameState = null;
+		List <Integer> legalMoves = null;
 				
 		//System.out.println(play(game, 2, 3, 7));
 		//these values need to be dynamic
-		newGameState =  play(game, index, 3, 7);
-		newEvalValue = eval(newGameState);
+		
+		System.out.println("$$$$$$$$$$$4calling play with values game, index");
+		System.out.println(game);
+		//System.out.println(index);
+		
+		//this mancala index should be dynamic based on the player playing here
+		
+		legalMoves = getAllLegalMoves(game, currPlayer);
+		for (Integer index: legalMoves){
+			newGameState =  play(game, index, firstMancalaIndex, secondMancalaIndex);
+			newEvalValue = eval(newGameState);
+		}
 		
 		System.out.println("printing new game state and eval value below");
 		System.out.println(newGameState);
 		System.out.println(newEvalValue);
 		
+		
 		if (bonusChance){
 			System.out.println("inside bonus chance");
 			//play this again for all the possible configuration
-			if (currPlayer == "1"){
-				for (int i = 0; i<firstMancalaIndex; i++){
-					if ((int)newGameState.get(i) > 0){
-						minValue(newGameState, i, level, newEvalValue, currPlayer);
-					}
-				}
-			}
-			else if (currPlayer == "2"){
-				for (int i = secondMancalaIndex - 1; i > firstMancalaIndex; i--){
-					if ((int)newGameState.get(i) > 0){
-						minValue(newGameState, i, level, newEvalValue, currPlayer);
-					}
-				}
-			}
+			minValue(newGameState, level, newEvalValue,currPlayer);	
 		}
-		
-		
-		System.out.println("!!!bonus printing the game state and eval value below");
-		System.out.println(newGameState);
-		System.out.println(newEvalValue);
-		
-		
 		return 0;
 	}
 
+
+	static List getAllLegalMoves(List game, String player){
+
+		List<Integer> legalMoves = new ArrayList<Integer>();
+
+		if (player == "1"){
+			for (Integer i = 0; i<firstMancalaIndex; i++){
+				if ((Integer)game.get(i) > 0){
+					legalMoves.add(i);
+				}
+			}
+		}
+		else if (player == "2"){
+			for (Integer i = secondMancalaIndex - 1; i > firstMancalaIndex; i--){
+				if ((Integer)game.get(i) > 0){
+					legalMoves.add(i);
+				}
+			}
+		}
+		return legalMoves;
+	}
+
+	
 	static List play(List game, int index, int myMancalaIndex, int oppositionMancalaIndex){
 
 		//device a strategy to just traverse thru both the player's
@@ -163,10 +155,12 @@ public class mancala {
 			else{
 				int newValue = (int)game.get(index) + 1;
 				game.set(index, newValue);
+				System.out.println("updating stones of new index: "+ index);
 				
 				//setting the flag for bonus chance to be played
 				if (iter == noOfCoins - 1 && index == myMancalaIndex){
 					bonusChance = true;
+					System.out.println("********************");
 				}
 				
 				index = index + 1;
