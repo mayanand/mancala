@@ -11,6 +11,7 @@ public class mancala {
 	static String myPlayer = "1";		//harcoded it for now
 	static int cutOffDepth = 2;
 	static boolean bonusChance = false;
+	static String parentNode = new String();
 	static List <String> positionGame = new ArrayList<String>();
 
 	public static void main(String[] args) {
@@ -26,13 +27,13 @@ public class mancala {
 		game.add(2);	//adding last element of player 2: A1
 		game.add(0);	//adding mancala of player 2
 
-		positionGame.add("b1");
 		positionGame.add("b2");
 		positionGame.add("b3");
+		positionGame.add("b4");
 		positionGame.add("bMancala");
+		positionGame.add("a4");
 		positionGame.add("a3");
 		positionGame.add("a2");
-		positionGame.add("a1");
 		positionGame.add("aMancala");
 		
 		minimaxDecision(game, myPlayer);
@@ -41,7 +42,7 @@ public class mancala {
 
 	static  int minimaxDecision(List<Integer> game, String myPlayer){
 
-		int currGameLevel = 0;
+		int currGameLevel = 1;
 		int returnedValue;
 		int newEvalValue = 0;
 		int myMancalaIndex = 0;
@@ -57,6 +58,8 @@ public class mancala {
 		secondMancalaIndex = gameArraySize - 1;
 		int bestValue;
 		
+		System.out.println("root,0,-Infinity");
+		
 		//check every possible move for the max player
 		
 		if (myPlayer == "1"){ myMancalaIndex = firstMancalaIndex; otherMancalaIndex = secondMancalaIndex; }
@@ -66,48 +69,59 @@ public class mancala {
 		legalMoves = getAllLegalMoves(game, myPlayer);
 		for (Integer index: legalMoves){
 			
-			System.out.println("calling play inside mim max with player and game state as:");
+			/*System.out.println("calling play inside mim max with player and game state as:");
 			System.out.println(game);
 			System.out.println(myPlayer);
-			
+			*/
 			List<Integer> newGame = new ArrayList<Integer>(game);
 			
-			newGameState =  play(newGame, index, myMancalaIndex, otherMancalaIndex);
+			newGameState =  play(newGame, index, myMancalaIndex, otherMancalaIndex, positionGame.get(index));
 			newEvalValue = eval(newGameState);
 			
 			if (bonusChance == true){
-				results.add(maxValue(newGameState, currGameLevel, -10000, myPlayer));
-				System.out.println("current game state after 1st move with bonus");
+				results.add(maxValue(newGameState, currGameLevel, myPlayer));
+				//System.out.println("current game state after 1st move with bonus");
 			}
-			else{
-				System.out.println("game status after 1st dummy move without bonus move");
-				System.out.println(newGameState);
-				System.out.println(newEvalValue);
-				
+			else{		
+				System.out.println(positionGame.get(index) + "," + currGameLevel + "," + "infinity");
 				if (myPlayer == "1"){ newPlayer = "2"; }
 				else {newPlayer = "1";}
-				results.add(minValue(newGameState, currGameLevel+1, 10000, newPlayer ));
+				
+				results.add(minValue(newGameState, currGameLevel+1, newPlayer ));
 			}
 		}
 		
-		/*
+		
 		bestValue = Collections.max(results);
-		System.out.println(bestValue);
-	*/
+		
+		System.out.println(results);
+		
+		String bestMove = new String();
+		int bestValueIndex = new ArrayList<Integer>(results).indexOf(bestValue);
+		
+		if (myPlayer == "1"){
+			bestMove = positionGame.get(bestValueIndex);
+		}
+		else{
+			bestMove = positionGame.get(secondMancalaIndex - bestValueIndex);
+		}
+		System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&" + bestValue);
+		System.out.println("######### " + bestMove);
+	
 
 		return 0;
 	}
 
 
-	static int minValue(List game, int level, int newEvalValue,String currPlayer){
+	static int minValue(List game, int level, String currPlayer){
 		
 		//terminal condition test
 		if (cutOffDepth == level - 1){
-			return newEvalValue;
+			return eval(game);
 		}
 		
 		int currMinValue = 100000;
-		List newGameState = null;
+		List<Integer> newGameState = null;
 		List <Integer> legalMoves = null;
 		
 		int myMancalaIndex = 0;
@@ -115,48 +129,42 @@ public class mancala {
 		
 		if (currPlayer == "1"){ myMancalaIndex = firstMancalaIndex; otherMancalaIndex = secondMancalaIndex; }
 		else {myMancalaIndex = secondMancalaIndex; otherMancalaIndex = firstMancalaIndex;}
-		
-
-		System.out.println("into min vlaue $$$$$$$$$current player " + currPlayer);
-		
+				
 		legalMoves = getAllLegalMoves(game, currPlayer);
 		for (Integer index: legalMoves){
 			
 			List<Integer> newGame = new ArrayList<Integer>(game);
 			
-			newGameState =  play(newGame, index, myMancalaIndex, otherMancalaIndex);
-			newEvalValue = eval(newGameState);
+			newGameState =  play(newGame, index, myMancalaIndex, otherMancalaIndex, positionGame.get(index));
+			int newMinValue;
 			
-			System.out.println("printing new game state and eval value below in min function");
-			System.out.println(newGameState);
-			System.out.println(newEvalValue);
 			
 			if (bonusChance){
-				System.out.println("inside bonus chance");
-				//play this again for all the possible configuration
-				minValue(newGameState, level, newEvalValue,currPlayer);	
+				newMinValue = minValue(newGameState, level, currPlayer);
 			}
 			else{
 				String newPlayer = null;
 				if (currPlayer == "1"){ newPlayer = "2"; }
 				else {newPlayer = "1";}
-				System.out.println("current player " + currPlayer);
-				System.out.println("calling max value now and the player is " + newPlayer);
 				
-				currMinValue = Math.min(currMinValue, maxValue(newGameState, level + 1, currMinValue, newPlayer));
+				newMinValue = maxValue(newGameState, level + 1, newPlayer);
 				
 			}
+			
+			currMinValue = Math.min(currMinValue, newMinValue);
+			
+			System.out.println(positionGame.get(index) + "," + level + "," + currMinValue);
+			System.out.println("prinitin parent " + parentNode);
+
 		}
-		
-		
 		return currMinValue;
 	}
 
-static int maxValue(List game, int level, int newEvalValue, String currPlayer){
+static int maxValue(List game, int level, String currPlayer){
 		
 		//terminal condition test
 		if (cutOffDepth == level - 1){
-			return newEvalValue;
+			return eval(game);
 		}
 		
 		int currMaxValue = -100000;
@@ -169,28 +177,19 @@ static int maxValue(List game, int level, int newEvalValue, String currPlayer){
 		if (currPlayer == "1"){ myMancalaIndex = firstMancalaIndex; otherMancalaIndex = secondMancalaIndex; }
 		else {myMancalaIndex = secondMancalaIndex; otherMancalaIndex = firstMancalaIndex;}
 		
-		System.out.println("inside macvlaue $$$$$$$$$current player " + currPlayer);
-		
-		
 		legalMoves = getAllLegalMoves(game, currPlayer);
 		for (Integer index: legalMoves){
 			
 			List<Integer> newGame = new ArrayList<Integer>(game);
-			//newGame = game;
+	
+			newGameState =  play(newGame, index, myMancalaIndex, otherMancalaIndex, positionGame.get(index));
 			
-			newGameState =  play(newGame, index, myMancalaIndex, otherMancalaIndex);
-			newEvalValue = eval(newGameState);
-			
-			
-			System.out.println("inside max function printing new game state and eval value below");
-			System.out.println(newGameState);
-			System.out.println(newEvalValue);
-			
+			int newMaxValue;
 			
 			if (bonusChance){
 				System.out.println("inside bonus chance");
 				//play this again for all the possible configuration
-				maxValue(newGameState, level, newEvalValue,currPlayer);	
+				newMaxValue = maxValue(newGameState, level, currPlayer);	
 			}
 			
 			else{
@@ -198,23 +197,23 @@ static int maxValue(List game, int level, int newEvalValue, String currPlayer){
 				if (currPlayer == "1"){ newPlayer = "2"; }
 				else {newPlayer = "1";}
 				
-				System.out.println("^^^^^^^^^^inside else of max function new player, level " + newPlayer);
-				System.out.println(level);
-				
-				currMaxValue = Math.max(currMaxValue, minValue(newGameState, level + 1, currMaxValue, newPlayer));
+				newMaxValue = minValue(newGameState, level + 1, newPlayer);
+				//currMaxValue = Math.max(currMaxValue, minValue(newGameState, level + 1, newPlayer));
 			}
+			
+			currMaxValue = Math.max(currMaxValue, newMaxValue);
+			System.out.println(positionGame.get(index) + "," + level + currMaxValue);
+			
+			System.out.println("printing parent inmmax: " + parentNode);
 		}
 		
-		
-			
 		return currMaxValue;
 	}
+
 	static List getAllLegalMoves(List game, String player){
 
 		List<Integer> legalMoves = new ArrayList<Integer>();
 		
-		System.out.println("gettig legal moves for player: " + player);
-
 		if (player == "1"){
 			for (Integer i = 0; i<firstMancalaIndex; i++){
 				if ((Integer)game.get(i) > 0){
@@ -233,20 +232,21 @@ static int maxValue(List game, int level, int newEvalValue, String currPlayer){
 	}
 
 	
-	static List play(List game, int index, int myMancalaIndex, int oppositionMancalaIndex){
+	static List play(List game, int index, int myMancalaIndex, int oppositionMancalaIndex, String parent){
 
 		//device a strategy to just traverse thru both the player's
 		//boxes and mancala until move is over
 		
 		bonusChance = false;	//resetting bonus flag for next move
+		parentNode = parent;
 		
 		int noOfCoins = (int)game.get(index);
 		game.set(index, 0);	
 		index = index + 1;
-		System.out.println("no of coins and the index");
+		/*System.out.println("no of coins and the index");
 		System.out.println(noOfCoins);
 		System.out.println(index);
-	
+	*/
 		for (int iter = 0; iter < noOfCoins; iter++){
 			if (index == game.size()){
 				index = 0;
@@ -272,7 +272,6 @@ static int maxValue(List game, int level, int newEvalValue, String currPlayer){
 					bonusChance = true;
 					System.out.println("********************");
 				}
-				
 				index = index + 1;
 			}
 			
@@ -280,12 +279,12 @@ static int maxValue(List game, int level, int newEvalValue, String currPlayer){
 		}
 		
 		System.out.println("game status now: " + game);
-		
+		//System.out.println("eval " + eval(game));
 		return game;
 
 	}
 	
-	static int eval(List game){
+	static int eval(List<Integer> game){
 		
 		int eval = 0;
 		if (myPlayer == "1"){
@@ -298,7 +297,6 @@ static int maxValue(List game, int level, int newEvalValue, String currPlayer){
 			System.out.println("There is an error in an error at eval function");
 		}
 		
-		//System.out.println("prinitjng eval " + eval + "board state: " + game);
 		return eval;
 	}
 }
