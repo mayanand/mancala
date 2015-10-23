@@ -76,11 +76,8 @@ public class mancala {
 			
 			if (bonusChance == true){
 				results.add(maxValue(newGameState, currGameLevel, myPlayer, positionGame.get(index)));
-				//System.out.println("current game state after 1st move with bonus");
 			}
 			else{		
-
-				//System.out.println(positionGame.get(index) + "," + currGameLevel + "," + "infinity");
 				if (myPlayer == "1"){ newPlayer = "2"; }
 				else {newPlayer = "1";}
 				
@@ -112,6 +109,8 @@ public class mancala {
 
 	static int minValue(List game, int level, String currPlayer, String parent){
 		
+		System.out.println(game + " , " + level + " , " + currPlayer + " , " + parent);
+		
 		//terminal condition test
 		if (cutOffDepth == level){
 			System.out.println("min's terminal condition");
@@ -126,9 +125,9 @@ public class mancala {
 		int otherMancalaIndex = 0;
 
 		
-		if (!bonusChance){
+		/*if (!bonusChance){
 			parentNode = parent;
-		}
+		}*/
 		
 		System.out.println(parent + "," + level + "," + currMinValue );
 		
@@ -139,18 +138,22 @@ public class mancala {
 		legalMoves = getAllLegalMoves(game, currPlayer);
 		for (Integer index: legalMoves){
 			
-			System.out.println("printingplayers:  " + positionGame.get(index));
-			
+			/*System.out.println("printingplayers:  " + positionGame.get(index) + " curentlevel " + level);
+			System.out.println(positionGame);
+			*/
 			List<Integer> newGame = new ArrayList<Integer>(game);
 			
 			newGameState =  play(newGame, index, myMancalaIndex, otherMancalaIndex);
 			
 			int newMinValue;
+			Boolean isLastBonus = false;
 			
 			
 			if (bonusChance){
-				System.out.println("calling bonus chance with");
-				newMinValue = minValue(newGameState, level, currPlayer, positionGame.get(index));
+				parent = positionGame.get(index);
+				isLastBonus = true;
+				System.out.println("calling bonus chance with level: " + level);
+				newMinValue = minValue(newGameState, level, currPlayer, parent);
 			}
 			else{
 				String newPlayer = null;
@@ -169,20 +172,21 @@ public class mancala {
 			System.out.println(positionGame.get(index) + "," + newLevel + "," + currMinValue);
 			System.out.println(parent + "," + level + "," + currMinValue);
 			
-			
-
+			/*if (isLastBonus){
+				System.out.println(parent + "," + newLevel + "," + currMinValue);
+			}	
+			else{
+				System.out.println(parent + "," + level + "," + currMinValue);
+			}*/	
 		}
 		return currMinValue;
 	}
 
 static int maxValue(List game, int level, String currPlayer, String parent){
-		
-	System.out.println("!!!!!!!!!!!calling amx value");	
-	
 	
 	//terminal condition test
 		if (cutOffDepth == level){
-			System.out.println("in terminal condition of max");
+			//System.out.println("in terminal condition of max");
 			return eval(game);
 		}
 		
@@ -193,9 +197,6 @@ static int maxValue(List game, int level, String currPlayer, String parent){
 		int myMancalaIndex =0;
 		int otherMancalaIndex = 0;
 		
-		if (!bonusChance){
-			parentNode = parent;
-		}
 		
 		if (currPlayer == "1"){ myMancalaIndex = firstMancalaIndex; otherMancalaIndex = secondMancalaIndex; }
 		else {myMancalaIndex = secondMancalaIndex; otherMancalaIndex = firstMancalaIndex;}
@@ -207,13 +208,15 @@ static int maxValue(List game, int level, String currPlayer, String parent){
 			List<Integer> newGame = new ArrayList<Integer>(game);
 	
 			newGameState =  play(newGame, index, myMancalaIndex, otherMancalaIndex);
-			
+					
 			int newMaxValue;
 			
 			if (bonusChance){
 				System.out.println("inside bonus chance");
+				
+				parent = positionGame.get(index);
 				//play this again for all the possible configuration
-				newMaxValue = maxValue(newGameState, level, currPlayer, positionGame.get(index));	
+				newMaxValue = maxValue(newGameState, level, currPlayer, parent);	
 			}
 			
 			else{
@@ -236,6 +239,13 @@ static int maxValue(List game, int level, String currPlayer, String parent){
 			
 			System.out.println(positionGame.get(index) + "," + level + currMaxValue);
 			System.out.println(parent + "," + level + "," + currMaxValue);
+			
+			/*if (isLastBonus){
+				System.out.println(parent + "," + newLevel + "," + currMaxValue);
+			}	
+			else{
+				System.out.println(parent + "," + level + "," + currMaxValue);
+			}*/
 			
 		}
 		
@@ -269,7 +279,7 @@ static int maxValue(List game, int level, String currPlayer, String parent){
 		//device a strategy to just traverse thru both the player's
 		//boxes and mancala until move is over
 		
-		bonusChance = false;	//resetting bonus flag for next move
+		//bonusChance = false;	//resetting bonus flag for next move
 		
 		int noOfCoins = (int)game.get(index);
 		game.set(index, 0);	
