@@ -250,9 +250,13 @@ public class mancala {
 			}
 
 			currMinValue = Math.min(currMinValue, newMinValue);
-
-			System.out.println(child + "," + level + "," + currMinValue);
-
+			
+			if (newStateObj.getBonusChance()){
+				System.out.println(child + "," + (level+1) + "," + currMinValue);
+			}
+			else{
+				System.out.println(child + "," + level + "," + currMinValue);
+			}
 		}
 		return currMinValue;
 	}
@@ -305,8 +309,15 @@ public class mancala {
 			}
 
 			currMaxValue = Math.max(currMaxValue, newMaxValue);
-			System.out.println(child + "," + level + "," + currMaxValue);
-
+			//System.out.println(child + "," + level + "," + currMaxValue);
+			
+			if (newStateObj.getBonusChance()){
+				System.out.println(child + "," + (level+1) + "," + currMaxValue);
+			}
+			else{
+				System.out.println(child + "," + level + "," + currMaxValue);
+			}
+			
 		}
 
 		return currMaxValue;
