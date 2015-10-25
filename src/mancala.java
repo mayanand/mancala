@@ -100,8 +100,8 @@ public class mancala {
 		if (caseType == 2){
 
 			int value = minimaxDecision(stateObj, myPlayer);
-			nextStateList = getNextState(stateObj,mancala.bestMoveIndex, value);
 			outputDump(outputList, "traverse_log.txt");
+			nextStateList = getNextState(stateObj,mancala.bestMoveIndex, value);
 			outputDump(nextStateList, "next_state.txt");			
 		}
 
@@ -126,6 +126,9 @@ public class mancala {
 
 		System.out.println("Node,Depth,Value");
 		System.out.println("root,0,-Infinity");
+		
+		outputList.add("Node,Depth,Value");
+		outputList.add("root,0,-Infinity");
 
 		String parent = "root";
 
@@ -147,6 +150,7 @@ public class mancala {
 			if (newGameState.getBonusChance() == true){
 
 				System.out.println(positionGame.get(index) + "," + (currGameLevel+1) + "," + "-Infinity" );
+				outputList.add(positionGame.get(index) + "," + (currGameLevel+1) + "," + "-Infinity");
 				newValue = maxValue(newGameState, currGameLevel, myPlayer, parent, positionGame.get(index));
 
 				results.add(newValue);
@@ -155,7 +159,6 @@ public class mancala {
 				if (myPlayer.equals("1")){ newPlayer = "2"; }
 				else {newPlayer = "1";}
 
-				//System.out.println(positionGame.get(index) + "," + currGameLevel + "," + "Infinity" );
 				newValue = minValue(newGameState, currGameLevel+1, newPlayer, parent, positionGame.get(index));
 
 				results.add(newValue);
@@ -164,11 +167,10 @@ public class mancala {
 			currValue = Math.max(currValue, newValue);
 
 			System.out.println(parent + "," + "0" + "," + currValue );
+			outputList.add(parent + "," + "0" + "," + currValue );
 		}
 
 		bestValue = Collections.max(results);
-
-		//System.out.println("root" + "," + "0" + "," + bestValue);
 
 		System.out.println(results);
 
@@ -198,15 +200,15 @@ public class mancala {
 
 	static int minValue(state stateObj, int level, String currPlayer, String parent, String child){
 
-		//System.out.println(stateObj.getGameList() + " , " + level + " , " + currPlayer + " , " + parent);
-
 		//terminal condition test
 		if (cutOffDepth == level){
-			System.out.println("min's terminal condition");
+			//System.out.println("min's terminal condition");
 
 			int value = eval(stateObj.getGameList());
+			
 			System.out.println(child + "," + cutOffDepth + "," + value );
-
+			outputList.add(child + "," + cutOffDepth + "," + value );
+			
 			return value;
 		}
 
@@ -219,6 +221,7 @@ public class mancala {
 		
 		if (!stateObj.getBonusChance()){
 			System.out.println(child + "," + level + "," + "Infinity" );
+			outputList.add(child + "," + level + "," + "Infinity" );
 		}
 		if (currPlayer.equals("1")){ myMancalaIndex = firstMancalaIndex; otherMancalaIndex = secondMancalaIndex; }
 		else {myMancalaIndex = secondMancalaIndex; otherMancalaIndex = firstMancalaIndex;}
@@ -239,6 +242,7 @@ public class mancala {
 			if (newGameState.getBonusChance() == true){
 				
 				System.out.println(positionGame.get(index) + "," + (level+1) + "," + "Infinity" );
+				outputList.add(positionGame.get(index) + "," + (level+1) + "," + "Infinity" );
 				newMinValue = minValue(newGameState, level, currPlayer, parent, currMove);
 			}
 			else{
@@ -253,9 +257,11 @@ public class mancala {
 			
 			if (newStateObj.getBonusChance()){
 				System.out.println(child + "," + (level+1) + "," + currMinValue);
+				outputList.add(child + "," + (level+1) + "," + currMinValue);
 			}
 			else{
 				System.out.println(child + "," + level + "," + currMinValue);
+				outputList.add(child + "," + level + "," + currMinValue);
 			}
 		}
 		return currMinValue;
@@ -268,6 +274,7 @@ public class mancala {
 			int value = eval(stateObj.getGameList());
 
 			System.out.println(child + "," + cutOffDepth + "," + value );
+			outputList.add(child + "," + cutOffDepth + "," + value );
 			return  value;
 		}
 
@@ -280,6 +287,7 @@ public class mancala {
 		
 		if (!stateObj.getBonusChance()){
 			System.out.println(child + "," + level + "," + "-Infinity" );
+			outputList.add(child + "," + level + "," + "-Infinity" );
 		}
 		if (currPlayer.equals("1")){ myMancalaIndex = firstMancalaIndex; otherMancalaIndex = secondMancalaIndex; }
 		else {myMancalaIndex = secondMancalaIndex; otherMancalaIndex = firstMancalaIndex;}
@@ -295,6 +303,7 @@ public class mancala {
 
 			if (newGameState.getBonusChance() == true){
 				System.out.println(positionGame.get(index) + "," + (level+1) + "," + "-Infinity" );
+				outputList.add(positionGame.get(index) + "," + (level+1) + "," + "-Infinity" );
 				newMaxValue = minValue(newGameState, level, currPlayer, parent, currMove);
 			}
 
@@ -309,13 +318,14 @@ public class mancala {
 			}
 
 			currMaxValue = Math.max(currMaxValue, newMaxValue);
-			//System.out.println(child + "," + level + "," + currMaxValue);
 			
 			if (newStateObj.getBonusChance()){
 				System.out.println(child + "," + (level+1) + "," + currMaxValue);
+				outputList.add(child + "," + (level+1) + "," + currMaxValue);
 			}
 			else{
 				System.out.println(child + "," + level + "," + currMaxValue);
+				outputList.add(child + "," + level + "," + currMaxValue);
 			}
 			
 		}
