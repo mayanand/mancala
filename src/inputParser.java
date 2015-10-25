@@ -33,7 +33,7 @@ public class inputParser {
 
 			while ((sCurrentLine = br.readLine()) != null) {
 				testCaseList.add(sCurrentLine);
-				System.out.println(sCurrentLine);
+				//System.out.println(sCurrentLine);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
