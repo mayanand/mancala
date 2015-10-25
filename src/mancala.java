@@ -417,8 +417,7 @@ public class mancala {
 
 	static state play(state stateObj, int index, int myMancalaIndex, int oppositionMancalaIndex){
 		
-		/*System.out.println("^^^^^^^^^^^^^^^my mancala index and opposition macala index");
-		System.out.println(myMancalaIndex + "," + oppositionMancalaIndex);*/
+
 		List<Integer> myIndices = new ArrayList<Integer>();
 		
 		if (myMancalaIndex<oppositionMancalaIndex){
@@ -432,11 +431,13 @@ public class mancala {
 		game = stateObj.getGameList();
 		int noOfCoins = (int)game.get(index);
 		boolean isBonus = false;
+		int oppMirrorIndex;
 
 		game.set(index, 0);	
 		index = index + 1;
 
 		for (int iter = 0; iter < noOfCoins; iter++){
+			
 			if (index == game.size()){
 				index = 0;
 			}
@@ -447,12 +448,30 @@ public class mancala {
 				if (index == game.size()){
 					index = 0;
 				}
-				int newValue = (int)game.get(index) + 1;
-				game.set(index, newValue);
+				if (iter == noOfCoins - 1 && myIndices.contains(index) && (int)game.get(index)==0){
+					oppMirrorIndex = oppositionMancalaIndex - index - 1;
+					int oppMirrorPebbles = game.get(oppMirrorIndex);
+					game.set(oppMirrorIndex, 0);
+					int newValue = oppMirrorPebbles + 1 + (int)game.get(myMancalaIndex);
+					game.set(myMancalaIndex, newValue);	
+				}
+				else{
+					int newValue = (int)game.get(index) + 1;
+					game.set(index, newValue);
+				}
 			}
 			else{
-				int newValue = (int)game.get(index) + 1;
-				game.set(index, newValue);
+				if (iter == noOfCoins - 1 && myIndices.contains(index) && (int)game.get(index)==0){
+					oppMirrorIndex = oppositionMancalaIndex - index - 1;
+					int oppMirrorPebbles = game.get(oppMirrorIndex);
+					game.set(oppMirrorIndex, 0);
+					int newValue = oppMirrorPebbles + 1 + (int)game.get(myMancalaIndex);
+					game.set(myMancalaIndex, newValue);	
+				}
+				else{
+					int newValue = (int)game.get(index) + 1;
+					game.set(index, newValue);
+				}
 
 				//setting the flag for bonus chance to be played
 				if (iter == noOfCoins - 1 && index == myMancalaIndex){
