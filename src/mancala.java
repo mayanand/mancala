@@ -146,7 +146,7 @@ public class mancala {
 
 			if (newGameState.getBonusChance() == true){
 
-				System.out.println(positionGame.get(index) + "," + currGameLevel + "," + "-Infinity" );
+				System.out.println(positionGame.get(index) + "," + (currGameLevel+1) + "," + "-Infinity" );
 				newValue = maxValue(newGameState, currGameLevel, myPlayer, parent, positionGame.get(index));
 
 				results.add(newValue);
@@ -163,7 +163,7 @@ public class mancala {
 			
 			currValue = Math.max(currValue, newValue);
 
-			System.out.println(parent + "," + "1" + "," + currValue );
+			System.out.println(parent + "," + "0" + "," + currValue );
 		}
 
 		bestValue = Collections.max(results);
@@ -229,9 +229,7 @@ public class mancala {
 		for (Integer index: legalMoves){
 
 			int newMinValue;
-			int newLevel;
 			String currMove = positionGame.get(index);
-
 			
 			List<Integer> newGame = new ArrayList<Integer>(stateObj.getGameList());
 			state newStateObj = new state(newGame, stateObj.getBonusChance());
@@ -242,7 +240,6 @@ public class mancala {
 				
 				System.out.println(positionGame.get(index) + "," + (level+1) + "," + "Infinity" );
 				newMinValue = minValue(newGameState, level, currPlayer, parent, currMove);
-				newLevel = level;
 			}
 			else{
 				String newPlayer = null;
@@ -250,13 +247,10 @@ public class mancala {
 				else {newPlayer = "1";}
 				 
 				newMinValue = maxValue(newGameState, level + 1, newPlayer, parent, currMove);
-
-				newLevel = level + 1;
 			}
 
 			currMinValue = Math.min(currMinValue, newMinValue);
 
-			//System.out.println(positionGame.get(index) + "," + level + "," + newMinValue);
 			System.out.println(child + "," + level + "," + currMinValue);
 
 		}
@@ -290,18 +284,14 @@ public class mancala {
 		for (Integer index: legalMoves){
 
 			int newMaxValue;
-			int newLevel;
 			state newStateObj = new state(stateObj.getGameList(), stateObj.getBonusChance());
 			String currMove = positionGame.get(index);
 			newGameState =  play(newStateObj, index, myMancalaIndex, otherMancalaIndex);
 
 
 			if (newGameState.getBonusChance() == true){
-				
-
 				System.out.println(positionGame.get(index) + "," + (level+1) + "," + "-Infinity" );
 				newMaxValue = minValue(newGameState, level, currPlayer, parent, currMove);
-				newLevel = level;
 			}
 
 
@@ -312,12 +302,9 @@ public class mancala {
 				else {newPlayer = "1";}
 
 				newMaxValue = minValue(newGameState, level + 1, newPlayer, parent, currMove);
-				newLevel = level + 1;
 			}
 
 			currMaxValue = Math.max(currMaxValue, newMaxValue);
-
-			//System.out.println(positionGame.get(index) + "," + newLevel + newMaxValue);
 			System.out.println(child + "," + level + "," + currMaxValue);
 
 		}
