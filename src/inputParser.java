@@ -27,7 +27,8 @@ public class inputParser {
 		//*******************************************************
 		try {
 			String sCurrentLine;
-			String fileName = "./src/" + filePath;	
+			String fileName = "./src/" + filePath;	//for local eclipse execution
+			//String fileName = filePath;		//for vocarium	
 
 			br = new BufferedReader(new FileReader(fileName));
 

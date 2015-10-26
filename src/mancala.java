@@ -665,7 +665,7 @@ public class mancala {
 			if (newStateObj.getBonusChance() == false){
 				break;
 			}
-			minimaxDecision(newStateObj, myPlayer);	
+			alphaBetaDecision(newStateObj, myPlayer);	
 		}
 
 		List<Integer> nextState = newStateObj.getGameList();
