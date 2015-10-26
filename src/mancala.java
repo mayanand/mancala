@@ -299,16 +299,12 @@ public class mancala {
 
 		legalMoves = getAllLegalMoves(stateObj.getGameList(), currPlayer);
 		for (Integer index: legalMoves){
-			
-			System.out.println(stateObj.getGameList() + " " +positionGame.get(index) );
-
 			int newMaxValue;
 			state newStateObj = new state(stateObj.getGameList(), stateObj.getBonusChance());
 			String currMove = positionGame.get(index);
 			newGameState =  play(newStateObj, index, myMancalaIndex, otherMancalaIndex);
 
-			System.out.println("new move: " + newGameState.getGameList() + "***isBonus***" + newGameState.getBonusChance() + "**level**" + level);
-
+			
 			if (newGameState.getBonusChance() == true){
 				System.out.println(positionGame.get(index) + "," + (level+1) + "," + "-Infinity" );
 				outputList.add(positionGame.get(index) + "," + (level+1) + "," + "-Infinity" );
@@ -324,11 +320,7 @@ public class mancala {
 
 				newMaxValue = minValue(newGameState, level + 1, newPlayer, parent, currMove);
 			}
-			
-//			System.out.println("!!!!Max!!! print child and current max value and new value");
-//			System.out.println(child + " " + currMaxValue + " " + newMaxValue);
-//	
-			
+						
 			currMaxValue = Math.max(currMaxValue, newMaxValue);
 			
 			if (newStateObj.getBonusChance()){
@@ -344,10 +336,6 @@ public class mancala {
 
 		return currMaxValue;
 	}
-	
-	
-	
-	
 	
 	
 	static List getNextState(state stateObj, int bestMoveIndex, int value){
@@ -428,7 +416,6 @@ public class mancala {
 
 
 	static state play(state stateObj, int index, int myMancalaIndex, int oppositionMancalaIndex){
-		
 
 		List<Integer> myIndices = new ArrayList<Integer>();
 		
@@ -436,7 +423,7 @@ public class mancala {
 			myIndices = IntStream.rangeClosed(0, myMancalaIndex-1).boxed().collect(Collectors.toList());
 		}
 		else{
-			myIndices = IntStream.rangeClosed(myMancalaIndex+1, oppositionMancalaIndex - 1).boxed().collect(Collectors.toList());
+			myIndices = IntStream.rangeClosed(oppositionMancalaIndex + 1, myMancalaIndex - 1).boxed().collect(Collectors.toList());
 		}
 
 		List<Integer> game = new ArrayList<Integer>(stateObj.getGameList()); 
@@ -460,7 +447,6 @@ public class mancala {
 					index = 0;
 				}
 				if (iter == noOfCoins - 1 && myIndices.contains(index) && (int)game.get(index)==0){
-					System.out.println("is the call comeing here");
 					if (myMancalaIndex < oppositionMancalaIndex){
 						oppMirrorIndex = oppositionMancalaIndex - index - 1;
 					}
@@ -479,8 +465,8 @@ public class mancala {
 				}
 			}
 			else{
+				
 				if (iter == noOfCoins - 1 && myIndices.contains(index) && (int)game.get(index)==0){
-					System.out.println("The calls shud come here");
 					if (myMancalaIndex < oppositionMancalaIndex){
 						oppMirrorIndex = oppositionMancalaIndex - index - 1;
 					}
