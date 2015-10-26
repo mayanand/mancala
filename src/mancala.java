@@ -143,7 +143,7 @@ public class mancala {
 
 			List<Integer> newGame = new ArrayList<Integer>(stateObj.getGameList());
 			state newStateObj = new state(newGame, stateObj.getBonusChance());
-
+			
 			newGameState =  play(newStateObj, index, myMancalaIndex, otherMancalaIndex);
 			int newValue;
 
@@ -169,7 +169,7 @@ public class mancala {
 			System.out.println(parent + "," + "0" + "," + currValue );
 			outputList.add(parent + "," + "0" + "," + currValue );
 		}
-
+				
 		bestValue = Collections.max(results);
 
 		System.out.println(results);
@@ -316,6 +316,7 @@ public class mancala {
 		else {myMancalaIndex = secondMancalaIndex; otherMancalaIndex = firstMancalaIndex;}
 
 		legalMoves = getAllLegalMoves(stateObj.getGameList(), currPlayer);
+		
 		for (Integer index: legalMoves){
 			int newMaxValue;
 			state newStateObj = new state(stateObj.getGameList(), stateObj.getBonusChance());
@@ -434,48 +435,6 @@ public class mancala {
 
 
 	static state play(state stateObj, int index, int myMancalaIndex, int oppositionMancalaIndex){
-
-		//checking if the game over condition has been met or not
-		int player1TotalPebbles = 0;
-		int player2TotalPebbles = 0;
-		int player1MancalaValue = stateObj.getGameList().get(firstMancalaIndex);
-		int player2MancalaValue = stateObj.getGameList().get(secondMancalaIndex);
-		
-		for (int b = 0;  b < firstMancalaIndex; b++){
-			player1TotalPebbles = player1TotalPebbles + (stateObj.getGameList()).get(b);
-		}
-		for (int a = firstMancalaIndex + 1; a < secondMancalaIndex; a++){
-			player2TotalPebbles = player2TotalPebbles + (stateObj.getGameList()).get(a);
-		}
-		
-		if (player1TotalPebbles == 0 || player2TotalPebbles == 0){
-		
-			if (player1TotalPebbles == 0){
-				player2MancalaValue = player2MancalaValue + player2TotalPebbles;
-			}
-			
-			else if (player2TotalPebbles == 0){
-				player1MancalaValue = player1MancalaValue + player1TotalPebbles;
-			}
-			
-			List<Integer> gameOverList = new ArrayList<Integer>();
-			
-			for (int i = 0 ; i < firstMancalaIndex; i++){
-				gameOverList.add(0);
-			}
-			gameOverList.add(player1MancalaValue);
-			
-			for (int j = 0; j < secondMancalaIndex; j++){
-				gameOverList.add(0);
-			}
-			gameOverList.add(player2MancalaValue);
-			
-			state gameOverState = new state(gameOverList, false);
-			gameOverState.setGameOver(true);
-			
-			return gameOverState;
-		}
-		
 		
 		List<Integer> myIndices = new ArrayList<Integer>();
 		
@@ -553,6 +512,49 @@ public class mancala {
 			}	
 		}
 		
+		
+		//checking if the game over condition has been met or not
+		int player1TotalPebbles = 0;
+		int player2TotalPebbles = 0;
+		int player1MancalaValue = game.get(firstMancalaIndex);
+		int player2MancalaValue = game.get(secondMancalaIndex);
+		
+		for (int b = 0;  b < firstMancalaIndex; b++){
+			player1TotalPebbles = player1TotalPebbles + game.get(b);
+		}
+		for (int a = firstMancalaIndex + 1; a < secondMancalaIndex; a++){
+			player2TotalPebbles = player2TotalPebbles + game.get(a);
+		}
+		
+		if (player1TotalPebbles == 0 || player2TotalPebbles == 0){
+		
+			if (player1TotalPebbles == 0){
+				player2MancalaValue = player2MancalaValue + player2TotalPebbles;
+			}
+			
+			else if (player2TotalPebbles == 0){
+				player1MancalaValue = player1MancalaValue + player1TotalPebbles;
+			}
+			
+			List<Integer> gameOverList = new ArrayList<Integer>();
+			
+			for (int i = 0 ; i < firstMancalaIndex; i++){
+				gameOverList.add(0);
+			}
+			
+			gameOverList.add(player1MancalaValue);
+			
+			for (int j = firstMancalaIndex + 1; j < secondMancalaIndex; j++){
+				gameOverList.add(0);
+			}
+			
+			gameOverList.add(player2MancalaValue);
+
+			state gameOverState = new state(gameOverList, false);
+			gameOverState.setGameOver(true);
+			
+			return gameOverState;
+		}
 		
 		state playedStateObj = new state(game, isBonus);
 
