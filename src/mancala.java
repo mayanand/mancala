@@ -137,7 +137,6 @@ public class mancala {
 		if (myPlayer.equals("1")){ myMancalaIndex = firstMancalaIndex; otherMancalaIndex = secondMancalaIndex; }
 		else {myMancalaIndex = secondMancalaIndex; otherMancalaIndex = firstMancalaIndex;}
 
-		System.out.println(stateObj.getGameList() + " " + myPlayer);
 		legalMoves = getAllLegalMoves(stateObj.getGameList(), myPlayer);
 		
 		for (Integer index: legalMoves){
@@ -201,9 +200,20 @@ public class mancala {
 
 	static int minValue(state stateObj, int level, String currPlayer, String parent, String child){
 
+		if (stateObj.getGameOver()){
+			System.out.println("!!! game over baby in min methode");
+			
+			int value = eval(stateObj.getGameList());
+			
+			System.out.println(child + "," + level + "," + value );
+			outputList.add(child + "," + level + "," + value );
+			
+			return value;
+		}
+
+		
 		//terminal condition test
 		if (cutOffDepth == level){
-			System.out.println(stateObj.getGameList());
 
 			int value = eval(stateObj.getGameList());
 			
@@ -253,10 +263,6 @@ public class mancala {
 				 
 				newMinValue = maxValue(newGameState, level + 1, newPlayer, parent, currMove);
 			}
-
-			/*System.out.println("!!!!print child and current min value and new value");
-			System.out.println(child + " " + currMinValue + " " + newMinValue);
-			*/
 			
 			currMinValue = Math.min(currMinValue, newMinValue);
 			
@@ -274,6 +280,18 @@ public class mancala {
 
 	static int maxValue(state stateObj, int level, String currPlayer, String parent, String child){
 
+		if (stateObj.getGameOver()){
+			System.out.println("!!! game over baby in max call");
+			
+			int value = eval(stateObj.getGameList());
+			
+			System.out.println(child + "," + level + "," + value );
+			outputList.add(child + "," + level + "," + value );
+			
+			return value;
+		}
+		
+		
 		//terminal condition test
 		if (cutOffDepth == level){
 			int value = eval(stateObj.getGameList());
@@ -417,8 +435,52 @@ public class mancala {
 
 	static state play(state stateObj, int index, int myMancalaIndex, int oppositionMancalaIndex){
 
+		//checking if the game over condition has been met or not
+		int player1TotalPebbles = 0;
+		int player2TotalPebbles = 0;
+		int player1MancalaValue = stateObj.getGameList().get(firstMancalaIndex);
+		int player2MancalaValue = stateObj.getGameList().get(secondMancalaIndex);
+		
+		for (int b = 0;  b < firstMancalaIndex; b++){
+			player1TotalPebbles = player1TotalPebbles + (stateObj.getGameList()).get(b);
+		}
+		for (int a = firstMancalaIndex + 1; a < secondMancalaIndex; a++){
+			player2TotalPebbles = player2TotalPebbles + (stateObj.getGameList()).get(a);
+		}
+		
+		if (player1TotalPebbles == 0 || player2TotalPebbles == 0){
+		
+			if (player1TotalPebbles == 0){
+				player2MancalaValue = player2MancalaValue + player2TotalPebbles;
+			}
+			
+			else if (player2TotalPebbles == 0){
+				player1MancalaValue = player1MancalaValue + player1TotalPebbles;
+			}
+			
+			List<Integer> gameOverList = new ArrayList<Integer>();
+			
+			for (int i = 0 ; i < firstMancalaIndex; i++){
+				gameOverList.add(0);
+			}
+			gameOverList.add(player1MancalaValue);
+			
+			for (int j = 0; j < secondMancalaIndex; j++){
+				gameOverList.add(0);
+			}
+			gameOverList.add(player2MancalaValue);
+			
+			state gameOverState = new state(gameOverList, false);
+			gameOverState.setGameOver(true);
+			
+			return gameOverState;
+		}
+		
+		
 		List<Integer> myIndices = new ArrayList<Integer>();
 		
+		//setting up the indices if the current player and is used to check if the last pebble
+		//fell into empty box of the current player
 		if (myMancalaIndex<oppositionMancalaIndex){
 			myIndices = IntStream.rangeClosed(0, myMancalaIndex-1).boxed().collect(Collectors.toList());
 		}
