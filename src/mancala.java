@@ -438,7 +438,7 @@ public class mancala {
 
 			newGameState =  play(newStateObj, index, myMancalaIndex, otherMancalaIndex);
 			int newValue;
-
+			
 			if (newGameState.getBonusChance() == true){
 
 				System.out.println(positionGame.get(index) + "," + (currGameLevel+1) + "," + "-Infinity" );
@@ -738,13 +738,13 @@ public class mancala {
 		else{
 			myIndices = IntStream.rangeClosed(oppositionMancalaIndex + 1, myMancalaIndex - 1).boxed().collect(Collectors.toList());
 		}
-
+		
 		List<Integer> game = new ArrayList<Integer>(stateObj.getGameList()); 
 		int noOfCoins = (int)game.get(index);
 		boolean isBonus = false;
 		int oppMirrorIndex;
 
-		game.set(index, 0);	
+		game.set(index, 0);
 		index = index + 1;
 
 		for (int iter = 0; iter < noOfCoins; iter++){
@@ -756,6 +756,7 @@ public class mancala {
 			if (index == oppositionMancalaIndex){
 				//add a pebble to the next available box instead of opposition's mancala
 				index = index + 1;
+
 				if (index == game.size()){
 					index = 0;
 				}
@@ -765,14 +766,15 @@ public class mancala {
 					}
 					else{
 						oppMirrorIndex = myMancalaIndex - index - 1;
-					}	
-					oppMirrorIndex = oppositionMancalaIndex - index - 1;
+					}
+					
 					int oppMirrorPebbles = game.get(oppMirrorIndex);
 					game.set(oppMirrorIndex, 0);
 					int newValue = oppMirrorPebbles + 1 + (int)game.get(myMancalaIndex);
 					game.set(myMancalaIndex, newValue);	
 				}
 				else{
+
 					int newValue = (int)game.get(index) + 1;
 					game.set(index, newValue);
 				}
@@ -795,13 +797,12 @@ public class mancala {
 					int newValue = (int)game.get(index) + 1;
 					game.set(index, newValue);
 				}
-
-				//setting the flag for bonus chance to be played
-				if (iter == noOfCoins - 1 && index == myMancalaIndex){
-					isBonus = true;
-				}
-				index = index + 1;
-			}	
+			}
+			//setting the flag for bonus chance to be played
+			if (iter == noOfCoins - 1 && index == myMancalaIndex){
+				isBonus = true;
+			}
+			index = index + 1;
 		}
 
 
