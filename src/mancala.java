@@ -49,14 +49,14 @@ public class mancala {
 			positionGame.add(position);
 			i = i + 1;
 		}
-		
+
 		game.add(player1Mancala);
 		positionGame.add("bMancala");
 
 		for (int j = player2Board.length - 1; j >= 0; j --){
 			game.add(Integer.parseInt(player2Board[j]));
 		}
-		
+
 		game.add(player2Mancala);
 
 		for (int j = player2Board.length + 1; j > 1; j--){
@@ -64,7 +64,7 @@ public class mancala {
 			positionGame.add(position);
 		}
 		positionGame.add("aMancala");
-		
+
 		boolean bonusChance = false;
 
 		/*game.add(2);	//adding 1st element of player 1: B1
@@ -98,15 +98,287 @@ public class mancala {
 		}
 
 		if (caseType == 2){
-
 			int value = minimaxDecision(stateObj, myPlayer);
 			outputDump(outputList, "traverse_log.txt");
 			nextStateList = getNextState(stateObj,mancala.bestMoveIndex, value);
 			outputDump(nextStateList, "next_state.txt");			
 		}
+		
+		if (caseType == 3){
+			int value = alphaBetaDecision(stateObj, myPlayer);
+			outputDump(outputList, "traverse_log.txt");
+			nextStateList = getNextState(stateObj,mancala.bestMoveIndex, value);
+			outputDump(nextStateList, "next_state.txt");
+		}
 
 	}
 
+	static  int alphaBetaDecision(state stateObj, String myPlayer){
+
+		int currGameLevel = 0;
+		int myMancalaIndex = 0;
+		int otherMancalaIndex = 0;
+		int currValue = -1000000;
+		int alpha = -1000000;
+		int beta = 1000000;
+		String newPlayer = null;
+
+		List<Integer> results = new ArrayList<Integer>();
+		List<Integer> legalMoves = null;
+		state newGameState = null;
+
+		gameArraySize = stateObj.getGameList().size();
+		firstMancalaIndex = (gameArraySize / 2) - 1;
+		secondMancalaIndex = gameArraySize - 1;
+		int bestValue;
+
+		System.out.println("Node,Depth,Value,Alpha,Beta");
+		System.out.println("root,0,-Infinity,-Infinity,Infinity");
+
+		outputList.add("Node,Depth,Value,Alpha,Beta");
+		outputList.add("root,0,-Infinity,-Infinity,Infinity");
+
+		String parent = "root";
+
+		//check every possible move for the max player
+
+		if (myPlayer.equals("1")){ myMancalaIndex = firstMancalaIndex; otherMancalaIndex = secondMancalaIndex; }
+		else {myMancalaIndex = secondMancalaIndex; otherMancalaIndex = firstMancalaIndex;}
+
+		legalMoves = getAllLegalMoves(stateObj.getGameList(), myPlayer);
+
+		for (Integer index: legalMoves){
+
+			List<Integer> newGame = new ArrayList<Integer>(stateObj.getGameList());
+			state newStateObj = new state(newGame, stateObj.getBonusChance());
+
+			newGameState =  play(newStateObj, index, myMancalaIndex, otherMancalaIndex);
+			int newValue;
+
+			if (newGameState.getBonusChance() == true){
+
+				System.out.println(positionGame.get(index) + "," + (currGameLevel+1) + "," + "-Infinity" );
+				outputList.add(positionGame.get(index) + "," + (currGameLevel+1) + "," + "-Infinity");
+				newValue = alphaBetaMaxValue(newGameState, currGameLevel, myPlayer, parent, positionGame.get(index), alpha, beta);
+
+				results.add(newValue);
+			}
+			else{		
+				if (myPlayer.equals("1")){ newPlayer = "2"; }
+				else {newPlayer = "1";}
+
+				newValue = alphaBetaMinValue(newGameState, currGameLevel+1, newPlayer, parent, positionGame.get(index), alpha, beta);
+
+				results.add(newValue);
+			}
+
+			currValue = Math.max(currValue, newValue);
+			alpha = currValue;
+
+			System.out.println(parent + "," + "0" + "," + currValue + "," + alpha + "," + beta  );
+			outputList.add(parent + "," + "0" + "," + currValue + "," + alpha + "," + beta);
+		}
+
+		bestValue = Collections.max(results);
+
+		System.out.println(results);
+
+		String bestMove = new String();
+		int newValueIndex = new ArrayList<Integer>(results).indexOf(bestValue);
+
+
+		//we take the index of the legal values
+		//the legal values list contains the index of positiongame
+		int bestValueIndex= legalMoves.get(newValueIndex);
+
+		if (myPlayer.equals("1")){
+			bestMove = positionGame.get(bestValueIndex);
+		}
+		else{
+			bestMove = positionGame.get(secondMancalaIndex - bestValueIndex);
+		}
+		System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&" + bestValue);
+		System.out.println("######### " + bestMove);
+
+		mancala.bestValue = bestValue;
+		mancala.bestMoveIndex = bestValueIndex;
+
+		return 0;
+	}
+
+
+	static int alphaBetaMinValue(state stateObj, int level, String currPlayer, String parent, String child, int alpha, int beta){
+
+		if (stateObj.getGameOver()){
+			System.out.println("!!! game over baby in min methode");
+
+			int value = eval(stateObj.getGameList());
+
+			System.out.println(child + "," + level + "," + value + "," + alpha + "," + beta );
+			outputList.add(child + "," + level + "," + value + "," + alpha + "," + beta);
+
+			return value;
+		}
+
+
+		//terminal condition test
+		if (cutOffDepth == level){
+
+			int value = eval(stateObj.getGameList());
+
+			System.out.println(child + "," + cutOffDepth + "," + value + "," + alpha + "," + beta);
+			outputList.add(child + "," + cutOffDepth + "," + value + "," + alpha + "," + beta);
+
+			return value;
+		}
+
+		state newGameState = null;
+		List <Integer> legalMoves = null;
+
+		int myMancalaIndex = 0;
+		int otherMancalaIndex = 0;
+		int currMinValue = 100000;
+
+		if (!stateObj.getBonusChance()){
+			System.out.println(child + "," + level + "," + "Infinity" + "," + alpha + "," + beta );
+			outputList.add(child + "," + level + "," + "Infinity" + "," + alpha + "," + beta );
+		}
+		if (currPlayer.equals("1")){ myMancalaIndex = firstMancalaIndex; otherMancalaIndex = secondMancalaIndex; }
+		else {myMancalaIndex = secondMancalaIndex; otherMancalaIndex = firstMancalaIndex;}
+
+
+		legalMoves = getAllLegalMoves(stateObj.getGameList(), currPlayer);
+
+		for (Integer index: legalMoves){
+
+			int newMinValue;
+			String currMove = positionGame.get(index);
+
+			List<Integer> newGame = new ArrayList<Integer>(stateObj.getGameList());
+			state newStateObj = new state(newGame, stateObj.getBonusChance());
+
+			newGameState =  play(newStateObj, index, myMancalaIndex, otherMancalaIndex);
+
+			if (newGameState.getBonusChance() == true){
+
+				System.out.println(positionGame.get(index) + "," + (level+1) + "," + "Infinity" + "," + alpha + "," + beta );
+				outputList.add(positionGame.get(index) + "," + (level+1) + "," + "Infinity" + "," + alpha + "," + beta );
+				newMinValue = alphaBetaMinValue(newGameState, level, currPlayer, parent, currMove, alpha, beta);
+			}
+			else{
+				String newPlayer = null;
+				if (currPlayer.equals("1")){ newPlayer = "2"; }
+				else {newPlayer = "1";}
+
+				newMinValue = alphaBetaMaxValue(newGameState, level + 1, newPlayer, parent, currMove, alpha, beta);
+			}
+
+			currMinValue = Math.min(currMinValue, newMinValue);
+
+			if (newStateObj.getBonusChance()){
+				System.out.println(child + "," + (level+1) + "," + currMinValue + "," + alpha + "," + beta );
+				outputList.add(child + "," + (level+1) + "," + currMinValue + "," + alpha + "," + beta );
+			}
+			else{
+				System.out.println(child + "," + level + "," + currMinValue + "," + alpha + "," + beta ) ;
+				outputList.add(child + "," + level + "," + currMinValue + "," + alpha + "," + beta );
+			}
+			
+			
+			if (currMinValue <= alpha){
+				return currMinValue; 
+			}
+			
+			beta = Math.min(currMinValue, beta);
+		}
+		return currMinValue;
+	}
+
+	static int alphaBetaMaxValue(state stateObj, int level, String currPlayer, String parent, String child, int alpha, int beta){
+
+		if (stateObj.getGameOver()){
+			System.out.println("!!! game over baby in max call");
+
+			int value = eval(stateObj.getGameList());
+
+			System.out.println(child + "," + level + "," + value + "," + alpha + "," + beta );
+			outputList.add(child + "," + level + "," + value  + "," + alpha + "," + beta );
+
+			return value;
+		}
+
+
+		//terminal condition test
+		if (cutOffDepth == level){
+			int value = eval(stateObj.getGameList());
+
+			System.out.println(child + "," + cutOffDepth + "," + value  + "," + alpha + "," + beta );
+			outputList.add(child + "," + cutOffDepth + "," + value + "," + alpha + "," + beta );
+			return  value;
+		}
+
+		int currMaxValue = -1000000;
+		state newGameState = null;
+		List <Integer> legalMoves = null;
+
+		int myMancalaIndex =0;
+		int otherMancalaIndex = 0;
+
+		if (!stateObj.getBonusChance()){
+			System.out.println(child + "," + level + "," + "-Infinity" + "," + alpha + "," + beta );
+			outputList.add(child + "," + level + "," + "-Infinity" + "," + alpha + "," + beta );
+		}
+		if (currPlayer.equals("1")){ myMancalaIndex = firstMancalaIndex; otherMancalaIndex = secondMancalaIndex; }
+		else {myMancalaIndex = secondMancalaIndex; otherMancalaIndex = firstMancalaIndex;}
+
+		legalMoves = getAllLegalMoves(stateObj.getGameList(), currPlayer);
+
+		for (Integer index: legalMoves){
+			int newMaxValue;
+			state newStateObj = new state(stateObj.getGameList(), stateObj.getBonusChance());
+			String currMove = positionGame.get(index);
+			newGameState =  play(newStateObj, index, myMancalaIndex, otherMancalaIndex);
+
+
+			if (newGameState.getBonusChance() == true){
+				System.out.println(positionGame.get(index) + "," + (level+1) + "," + "-Infinity" + "," + alpha + "," + beta );
+				outputList.add(positionGame.get(index) + "," + (level+1) + "," + "-Infinity" + "," + alpha + "," + beta );
+				newMaxValue = alphaBetaMaxValue(newGameState, level, currPlayer, parent, currMove, alpha, beta);
+			}
+
+
+			else{
+
+				String newPlayer = null;
+				if (currPlayer.equals("1")){ newPlayer = "2"; }
+				else {newPlayer = "1";}
+
+				newMaxValue = alphaBetaMinValue(newGameState, level + 1, newPlayer, parent, currMove, alpha, beta);
+			}
+
+			currMaxValue = Math.max(currMaxValue, newMaxValue);
+
+			if (newStateObj.getBonusChance()){
+				System.out.println(child + "," + (level+1) + "," + currMaxValue + "," + alpha + "," + beta );
+				outputList.add(child + "," + (level+1) + "," + currMaxValue + "," + alpha + "," + beta );
+			}
+			else{
+				System.out.println(child + "," + level + "," + currMaxValue + "," + alpha + "," + beta );
+				outputList.add(child + "," + level + "," + currMaxValue + "," + alpha + "," + beta );
+			}
+			
+			if (currMaxValue >= beta){
+				return currMaxValue;
+			}
+			
+			alpha = Math.max(currMaxValue, alpha);
+
+		}
+
+		return currMaxValue;
+	}
+
+	
 	static  int minimaxDecision(state stateObj, String myPlayer){
 
 		int currGameLevel = 0;
@@ -126,7 +398,7 @@ public class mancala {
 
 		System.out.println("Node,Depth,Value");
 		System.out.println("root,0,-Infinity");
-		
+
 		outputList.add("Node,Depth,Value");
 		outputList.add("root,0,-Infinity");
 
@@ -138,12 +410,12 @@ public class mancala {
 		else {myMancalaIndex = secondMancalaIndex; otherMancalaIndex = firstMancalaIndex;}
 
 		legalMoves = getAllLegalMoves(stateObj.getGameList(), myPlayer);
-		
+
 		for (Integer index: legalMoves){
 
 			List<Integer> newGame = new ArrayList<Integer>(stateObj.getGameList());
 			state newStateObj = new state(newGame, stateObj.getBonusChance());
-			
+
 			newGameState =  play(newStateObj, index, myMancalaIndex, otherMancalaIndex);
 			int newValue;
 
@@ -163,21 +435,21 @@ public class mancala {
 
 				results.add(newValue);
 			}
-			
+
 			currValue = Math.max(currValue, newValue);
 
 			System.out.println(parent + "," + "0" + "," + currValue );
 			outputList.add(parent + "," + "0" + "," + currValue );
 		}
-				
+
 		bestValue = Collections.max(results);
 
 		System.out.println(results);
 
 		String bestMove = new String();
 		int newValueIndex = new ArrayList<Integer>(results).indexOf(bestValue);
-		
-		
+
+
 		//we take the index of the legal values
 		//the legal values list contains the index of positiongame
 		int bestValueIndex= legalMoves.get(newValueIndex);
@@ -202,24 +474,24 @@ public class mancala {
 
 		if (stateObj.getGameOver()){
 			System.out.println("!!! game over baby in min methode");
-			
+
 			int value = eval(stateObj.getGameList());
-			
+
 			System.out.println(child + "," + level + "," + value );
 			outputList.add(child + "," + level + "," + value );
-			
+
 			return value;
 		}
 
-		
+
 		//terminal condition test
 		if (cutOffDepth == level){
 
 			int value = eval(stateObj.getGameList());
-			
+
 			System.out.println(child + "," + cutOffDepth + "," + value );
 			outputList.add(child + "," + cutOffDepth + "," + value );
-			
+
 			return value;
 		}
 
@@ -229,7 +501,7 @@ public class mancala {
 		int myMancalaIndex = 0;
 		int otherMancalaIndex = 0;
 		int currMinValue = 100000;
-		
+
 		if (!stateObj.getBonusChance()){
 			System.out.println(child + "," + level + "," + "Infinity" );
 			outputList.add(child + "," + level + "," + "Infinity" );
@@ -239,19 +511,19 @@ public class mancala {
 
 
 		legalMoves = getAllLegalMoves(stateObj.getGameList(), currPlayer);
-		
+
 		for (Integer index: legalMoves){
 
 			int newMinValue;
 			String currMove = positionGame.get(index);
-			
+
 			List<Integer> newGame = new ArrayList<Integer>(stateObj.getGameList());
 			state newStateObj = new state(newGame, stateObj.getBonusChance());
-			
+
 			newGameState =  play(newStateObj, index, myMancalaIndex, otherMancalaIndex);
-			
+
 			if (newGameState.getBonusChance() == true){
-				
+
 				System.out.println(positionGame.get(index) + "," + (level+1) + "," + "Infinity" );
 				outputList.add(positionGame.get(index) + "," + (level+1) + "," + "Infinity" );
 				newMinValue = minValue(newGameState, level, currPlayer, parent, currMove);
@@ -260,12 +532,12 @@ public class mancala {
 				String newPlayer = null;
 				if (currPlayer.equals("1")){ newPlayer = "2"; }
 				else {newPlayer = "1";}
-				 
+
 				newMinValue = maxValue(newGameState, level + 1, newPlayer, parent, currMove);
 			}
-			
+
 			currMinValue = Math.min(currMinValue, newMinValue);
-			
+
 			if (newStateObj.getBonusChance()){
 				System.out.println(child + "," + (level+1) + "," + currMinValue);
 				outputList.add(child + "," + (level+1) + "," + currMinValue);
@@ -282,16 +554,16 @@ public class mancala {
 
 		if (stateObj.getGameOver()){
 			System.out.println("!!! game over baby in max call");
-			
+
 			int value = eval(stateObj.getGameList());
-			
+
 			System.out.println(child + "," + level + "," + value );
 			outputList.add(child + "," + level + "," + value );
-			
+
 			return value;
 		}
-		
-		
+
+
 		//terminal condition test
 		if (cutOffDepth == level){
 			int value = eval(stateObj.getGameList());
@@ -307,7 +579,7 @@ public class mancala {
 
 		int myMancalaIndex =0;
 		int otherMancalaIndex = 0;
-		
+
 		if (!stateObj.getBonusChance()){
 			System.out.println(child + "," + level + "," + "-Infinity" );
 			outputList.add(child + "," + level + "," + "-Infinity" );
@@ -316,14 +588,14 @@ public class mancala {
 		else {myMancalaIndex = secondMancalaIndex; otherMancalaIndex = firstMancalaIndex;}
 
 		legalMoves = getAllLegalMoves(stateObj.getGameList(), currPlayer);
-		
+
 		for (Integer index: legalMoves){
 			int newMaxValue;
 			state newStateObj = new state(stateObj.getGameList(), stateObj.getBonusChance());
 			String currMove = positionGame.get(index);
 			newGameState =  play(newStateObj, index, myMancalaIndex, otherMancalaIndex);
 
-			
+
 			if (newGameState.getBonusChance() == true){
 				System.out.println(positionGame.get(index) + "," + (level+1) + "," + "-Infinity" );
 				outputList.add(positionGame.get(index) + "," + (level+1) + "," + "-Infinity" );
@@ -339,9 +611,9 @@ public class mancala {
 
 				newMaxValue = minValue(newGameState, level + 1, newPlayer, parent, currMove);
 			}
-						
+
 			currMaxValue = Math.max(currMaxValue, newMaxValue);
-			
+
 			if (newStateObj.getBonusChance()){
 				System.out.println(child + "," + (level+1) + "," + currMaxValue);
 				outputList.add(child + "," + (level+1) + "," + currMaxValue);
@@ -350,24 +622,24 @@ public class mancala {
 				System.out.println(child + "," + level + "," + currMaxValue);
 				outputList.add(child + "," + level + "," + currMaxValue);
 			}
-			
+
 		}
 
 		return currMaxValue;
 	}
 	
-	
+
 	static List getNextState(state stateObj, int bestMoveIndex, int value){
-		
+
 		state newStateObj = new state(stateObj.getGameList(), stateObj.getBonusChance());
 		List<String> nextStateList = new ArrayList<String>();
-		
+
 		int myMancalaIndex;
 		int otherMancalaIndex;
 
 		if (myPlayer.equals("1")){ myMancalaIndex = firstMancalaIndex; otherMancalaIndex = secondMancalaIndex; }
 		else {myMancalaIndex = secondMancalaIndex; otherMancalaIndex = firstMancalaIndex;}
-		
+
 		while(true){
 			newStateObj =  play(newStateObj, mancala.bestMoveIndex, myMancalaIndex, otherMancalaIndex);
 			if (newStateObj.getBonusChance() == false){
@@ -375,11 +647,11 @@ public class mancala {
 			}
 			minimaxDecision(newStateObj, myPlayer);	
 		}
-		
+
 		List<Integer> nextState = newStateObj.getGameList();
-		
+
 		System.out.println("next state: " + nextState);
-		
+
 		String temp = new String();
 		for (Integer i = secondMancalaIndex - 1; i > firstMancalaIndex; i--){
 			if (!temp.equals("")){
@@ -387,24 +659,24 @@ public class mancala {
 			}
 			temp = temp + Integer.toString(nextState.get(i));
 		}
-		
+
 		nextStateList.add(temp);
-		
+
 		temp = "";
-		
+
 		for (Integer i = 0; i<firstMancalaIndex; i++){
 			if (!temp.equals("")){
 				temp = temp + " ";
 			}
 			temp = temp + Integer.toString(nextState.get(i));
 		}
-		
+
 		nextStateList.add(temp);
 		nextStateList.add(Integer.toString(nextState.get(secondMancalaIndex)));
 		nextStateList.add(Integer.toString(nextState.get(firstMancalaIndex)));
-		
+
 		return nextStateList;
-		
+
 	}
 
 	static List getAllLegalMoves(List game, String player){
@@ -435,9 +707,9 @@ public class mancala {
 
 
 	static state play(state stateObj, int index, int myMancalaIndex, int oppositionMancalaIndex){
-		
+
 		List<Integer> myIndices = new ArrayList<Integer>();
-		
+
 		//setting up the indices if the current player and is used to check if the last pebble
 		//fell into empty box of the current player
 		if (myMancalaIndex<oppositionMancalaIndex){
@@ -456,7 +728,7 @@ public class mancala {
 		index = index + 1;
 
 		for (int iter = 0; iter < noOfCoins; iter++){
-			
+
 			if (index == game.size()){
 				index = 0;
 			}
@@ -486,7 +758,7 @@ public class mancala {
 				}
 			}
 			else{
-				
+
 				if (iter == noOfCoins - 1 && myIndices.contains(index) && (int)game.get(index)==0){
 					if (myMancalaIndex < oppositionMancalaIndex){
 						oppMirrorIndex = oppositionMancalaIndex - index - 1;
@@ -511,51 +783,51 @@ public class mancala {
 				index = index + 1;
 			}	
 		}
-		
-		
+
+
 		//checking if the game over condition has been met or not
 		int player1TotalPebbles = 0;
 		int player2TotalPebbles = 0;
 		int player1MancalaValue = game.get(firstMancalaIndex);
 		int player2MancalaValue = game.get(secondMancalaIndex);
-		
+
 		for (int b = 0;  b < firstMancalaIndex; b++){
 			player1TotalPebbles = player1TotalPebbles + game.get(b);
 		}
 		for (int a = firstMancalaIndex + 1; a < secondMancalaIndex; a++){
 			player2TotalPebbles = player2TotalPebbles + game.get(a);
 		}
-		
+
 		if (player1TotalPebbles == 0 || player2TotalPebbles == 0){
-		
+
 			if (player1TotalPebbles == 0){
 				player2MancalaValue = player2MancalaValue + player2TotalPebbles;
 			}
-			
+
 			else if (player2TotalPebbles == 0){
 				player1MancalaValue = player1MancalaValue + player1TotalPebbles;
 			}
-			
+
 			List<Integer> gameOverList = new ArrayList<Integer>();
-			
+
 			for (int i = 0 ; i < firstMancalaIndex; i++){
 				gameOverList.add(0);
 			}
-			
+
 			gameOverList.add(player1MancalaValue);
-			
+
 			for (int j = firstMancalaIndex + 1; j < secondMancalaIndex; j++){
 				gameOverList.add(0);
 			}
-			
+
 			gameOverList.add(player2MancalaValue);
 
 			state gameOverState = new state(gameOverList, false);
 			gameOverState.setGameOver(true);
-			
+
 			return gameOverState;
 		}
-		
+
 		state playedStateObj = new state(game, isBonus);
 
 		return playedStateObj;
@@ -584,8 +856,8 @@ public class mancala {
 			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFileName), "utf-8"));
 			for (String output : outputList){
 				writer.write(output + "\n");
-				}
-			} catch (IOException ex) {
+			}
+		} catch (IOException ex) {
 			// report
 			System.out.println("IO Exception found!!");
 		} finally {
