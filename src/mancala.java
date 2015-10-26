@@ -103,7 +103,7 @@ public class mancala {
 			nextStateList = getNextState(stateObj,mancala.bestMoveIndex, value);
 			outputDump(nextStateList, "next_state.txt");			
 		}
-		
+
 		if (caseType == 3){
 			int value = alphaBetaDecision(stateObj, myPlayer);
 			outputDump(outputList, "traverse_log.txt");
@@ -157,8 +157,8 @@ public class mancala {
 
 			if (newGameState.getBonusChance() == true){
 
-				System.out.println(positionGame.get(index) + "," + (currGameLevel+1) + "," + "-Infinity" );
-				outputList.add(positionGame.get(index) + "," + (currGameLevel+1) + "," + "-Infinity");
+				System.out.println(positionGame.get(index) + "," + (currGameLevel+1) + "," + "-Infinity" + "," + alpha + "," + beta );
+				outputList.add(positionGame.get(index) + "," + (currGameLevel+1) + "," + "-Infinity" + "," + alpha + "," + beta );
 				newValue = alphaBetaMaxValue(newGameState, currGameLevel, myPlayer, parent, positionGame.get(index), alpha, beta);
 
 				results.add(newValue);
@@ -275,6 +275,23 @@ public class mancala {
 
 			currMinValue = Math.min(currMinValue, newMinValue);
 
+
+			if (currMinValue <= alpha){
+
+				if (newStateObj.getBonusChance()){
+					System.out.println(child + "," + (level+1) + "," + currMinValue + "," + alpha + "," + beta );
+					outputList.add(child + "," + (level+1) + "," + currMinValue + "," + alpha + "," + beta );
+				}
+				else{
+					System.out.println(child + "," + level + "," + currMinValue + "," + alpha + "," + beta ) ;
+					outputList.add(child + "," + level + "," + currMinValue + "," + alpha + "," + beta );
+				}
+
+				return currMinValue; 
+			}
+
+			beta = Math.min(currMinValue, beta);
+
 			if (newStateObj.getBonusChance()){
 				System.out.println(child + "," + (level+1) + "," + currMinValue + "," + alpha + "," + beta );
 				outputList.add(child + "," + (level+1) + "," + currMinValue + "," + alpha + "," + beta );
@@ -283,13 +300,6 @@ public class mancala {
 				System.out.println(child + "," + level + "," + currMinValue + "," + alpha + "," + beta ) ;
 				outputList.add(child + "," + level + "," + currMinValue + "," + alpha + "," + beta );
 			}
-			
-			
-			if (currMinValue <= alpha){
-				return currMinValue; 
-			}
-			
-			beta = Math.min(currMinValue, beta);
 		}
 		return currMinValue;
 	}
@@ -358,6 +368,22 @@ public class mancala {
 
 			currMaxValue = Math.max(currMaxValue, newMaxValue);
 
+			if (currMaxValue >= beta){
+
+				if (newStateObj.getBonusChance()){
+					System.out.println(child + "," + (level+1) + "," + currMaxValue + "," + alpha + "," + beta );
+					outputList.add(child + "," + (level+1) + "," + currMaxValue + "," + alpha + "," + beta );
+				}
+				else{
+					System.out.println(child + "," + level + "," + currMaxValue + "," + alpha + "," + beta );
+					outputList.add(child + "," + level + "," + currMaxValue + "," + alpha + "," + beta );
+				}
+
+				return currMaxValue;
+			}
+
+			alpha = Math.max(currMaxValue, alpha);
+
 			if (newStateObj.getBonusChance()){
 				System.out.println(child + "," + (level+1) + "," + currMaxValue + "," + alpha + "," + beta );
 				outputList.add(child + "," + (level+1) + "," + currMaxValue + "," + alpha + "," + beta );
@@ -366,19 +392,13 @@ public class mancala {
 				System.out.println(child + "," + level + "," + currMaxValue + "," + alpha + "," + beta );
 				outputList.add(child + "," + level + "," + currMaxValue + "," + alpha + "," + beta );
 			}
-			
-			if (currMaxValue >= beta){
-				return currMaxValue;
-			}
-			
-			alpha = Math.max(currMaxValue, alpha);
 
 		}
 
 		return currMaxValue;
 	}
 
-	
+
 	static  int minimaxDecision(state stateObj, String myPlayer){
 
 		int currGameLevel = 0;
@@ -627,7 +647,7 @@ public class mancala {
 
 		return currMaxValue;
 	}
-	
+
 
 	static List getNextState(state stateObj, int bestMoveIndex, int value){
 
