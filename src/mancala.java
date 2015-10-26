@@ -43,28 +43,28 @@ public class mancala {
 		List <Integer> game = new ArrayList<Integer>();
 
 		int i = 2;
-		for (String b: player2Board){	
+		for (String b: player1Board){	
 			game.add(Integer.parseInt(b));
 			String position = "B" + i;
 			positionGame.add(position);
 			i = i + 1;
 		}
+		
 		game.add(player1Mancala);
 		positionGame.add("bMancala");
 
-		i = 2;
-		for (String a: player1Board){	
-			game.add(Integer.parseInt(a));
-			
+		for (int j = player2Board.length - 1; j >= 0; j --){
+			game.add(Integer.parseInt(player2Board[j]));
 		}
+		
 		game.add(player2Mancala);
 
-		for (int j = player1Board.length + 1; j > 1; j--){
+		for (int j = player2Board.length + 1; j > 1; j--){
 			String position = "A" + j;
 			positionGame.add(position);
 		}
 		positionGame.add("aMancala");
-
+		
 		boolean bonusChance = false;
 
 		/*game.add(2);	//adding 1st element of player 1: B1
@@ -137,6 +137,7 @@ public class mancala {
 		if (myPlayer.equals("1")){ myMancalaIndex = firstMancalaIndex; otherMancalaIndex = secondMancalaIndex; }
 		else {myMancalaIndex = secondMancalaIndex; otherMancalaIndex = firstMancalaIndex;}
 
+		System.out.println(stateObj.getGameList() + " " + myPlayer);
 		legalMoves = getAllLegalMoves(stateObj.getGameList(), myPlayer);
 		
 		for (Integer index: legalMoves){
@@ -306,12 +307,12 @@ public class mancala {
 			String currMove = positionGame.get(index);
 			newGameState =  play(newStateObj, index, myMancalaIndex, otherMancalaIndex);
 
-			System.out.println("new move: " + newGameState.getGameList());
+			System.out.println("new move: " + newGameState.getGameList() + "***isBonus***" + newGameState.getBonusChance() + "**level**" + level);
 
 			if (newGameState.getBonusChance() == true){
 				System.out.println(positionGame.get(index) + "," + (level+1) + "," + "-Infinity" );
 				outputList.add(positionGame.get(index) + "," + (level+1) + "," + "-Infinity" );
-				newMaxValue = minValue(newGameState, level, currPlayer, parent, currMove);
+				newMaxValue = maxValue(newGameState, level, currPlayer, parent, currMove);
 			}
 
 
@@ -459,6 +460,7 @@ public class mancala {
 					index = 0;
 				}
 				if (iter == noOfCoins - 1 && myIndices.contains(index) && (int)game.get(index)==0){
+					System.out.println("is the call comeing here");
 					if (myMancalaIndex < oppositionMancalaIndex){
 						oppMirrorIndex = oppositionMancalaIndex - index - 1;
 					}
@@ -478,6 +480,7 @@ public class mancala {
 			}
 			else{
 				if (iter == noOfCoins - 1 && myIndices.contains(index) && (int)game.get(index)==0){
+					System.out.println("The calls shud come here");
 					if (myMancalaIndex < oppositionMancalaIndex){
 						oppMirrorIndex = oppositionMancalaIndex - index - 1;
 					}
